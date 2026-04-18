@@ -33,6 +33,37 @@ from bronze.crm_cust_info
 )t -- removed duplicates and retained the latest data 
 where flag_last = 1) f
 
+
+-- cleaned and loaded silver.crm_prd_info
+
+insert into silver.crm_prd_info (
+	prd_id ,
+	cat_id ,
+	prd_key,
+	prd_nm ,
+	prd_cost ,
+	prd_line ,
+	prd_start_dt ,
+	prd_end_dt 
+)
+select 
+prd_id,
+replace(substring(prd_key,1,5),'-','_') as cat_id,--extract category id to link tables
+substring(prd_key,7,len(prd_key)) as prd_key,-- extract product key to joion tables
+prd_nm,
+isnull(prd_cost,0) as prd_cost,-- null values handles
+case upper(trim(prd_line))
+	 when  'M' then 'Mountain'
+	 when  'R' then 'Road'
+	 when  'S' then 'Other Sales'
+	 when  'T' then 'Touring'
+	 else 'n/a'-- data normalization as well as standardization 
+end as prd_line,
+
+cast(prd_start_dt as Date)as prd_start_dt,-- better format 
+cast(lead(prd_start_dt) over (partition by prd_key order by prd_start_dt) -1 as date) as prd_end_dt-- calculated end as one day before the next start date 
+from bronze.crm_prd_info 
+
 -- cleaned and loaded sliver.crm_sales_details table
 insert into silver.crm_sales_details(
 sls_ord_num ,
