@@ -119,3 +119,19 @@ case when upper(trim(gen)) in ('F','FEMALE') then 'Female'
 	 else 'n/a'
 end as gen
 from bronze.erp_cust_az12
+
+ -- loading and cleaning into silver.erp_loc_a101
+insert into silver.erp_loc_a101
+(
+cid,
+cntry
+)
+
+select
+replace(cid,'-','')cid,
+case when trim(cntry) = 'DE' then 'Germany'
+	 when trim(cntry) in ('United States','US','USA') then 'United States'
+	 when cntry is null or trim(cntry) = '' then 'n/a'
+	 else trim(cntry)
+end as cntry 
+from bronze.erp_loc_a101
