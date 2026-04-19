@@ -135,3 +135,19 @@ case when trim(cntry) = 'DE' then 'Germany'
 	 else trim(cntry)
 end as cntry 
 from bronze.erp_loc_a101
+
+-- cleaned and loaded data to silver.erp_px_cat_g1v2
+
+insert into silver.erp_px_cat_g1v2(
+id,
+cat,
+subcat,
+maintenance
+)
+
+select
+id,
+cat,
+subcat,
+maintenance
+from bronze.erp_px_cat_g1v2
